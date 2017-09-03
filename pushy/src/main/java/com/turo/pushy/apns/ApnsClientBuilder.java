@@ -30,8 +30,6 @@ import io.netty.handler.ssl.*;
 import io.netty.handler.ssl.ApplicationProtocolConfig.Protocol;
 import io.netty.handler.ssl.ApplicationProtocolConfig.SelectedListenerFailureBehavior;
 import io.netty.handler.ssl.ApplicationProtocolConfig.SelectorFailureBehavior;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLException;
 import java.io.File;
@@ -73,14 +71,16 @@ public class ApnsClientBuilder {
 
     private ProxyHandlerFactory proxyHandlerFactory;
 
-    private Long connectionTimeout;
-    private TimeUnit connectionTimeoutUnit;
+    private int connectionTimeoutMillis;
+    private long idlePingIntervalMillis = DEFAULT_PING_IDLE_TIME_MILLIS;
+    private long gracefulShutdownTimeoutMillis;
 
-    private Long idlePingInterval;
-    private TimeUnit idlePingIntervalUnit;
-
-    private Long gracefulShutdownTimeout;
-    private TimeUnit gracefulShutdownTimeoutUnit;
+    /**
+     * The default idle time in milliseconds after which the client will send a PING frame to the APNs server.
+     *
+     * @since 0.11
+     */
+    public static final int DEFAULT_PING_IDLE_TIME_MILLIS = 60_000;
 
     /**
      * The hostname for the production APNs gateway.
@@ -115,8 +115,6 @@ public class ApnsClientBuilder {
      * @since 0.5
      */
     public static final int ALTERNATE_APNS_PORT = 2197;
-
-    private static final Logger log = LoggerFactory.getLogger(ApnsClientBuilder.class);
 
     /**
      * Sets the hostname of the server to which the client under construction will connect. Apple provides a production
@@ -424,9 +422,7 @@ public class ApnsClientBuilder {
      * @since 0.8
      */
     public ApnsClientBuilder setConnectionTimeout(final long connectionTimeout, final TimeUnit timeoutUnit) {
-        this.connectionTimeout = connectionTimeout;
-        this.connectionTimeoutUnit = timeoutUnit;
-
+        this.connectionTimeoutMillis = (int) timeoutUnit.toMillis(connectionTimeout);
         return this;
     }
 
@@ -434,19 +430,17 @@ public class ApnsClientBuilder {
     /**
      * Sets the amount of idle time (in milliseconds) after which the client under construction will send a PING frame
      * to the APNs server. By default, clients will send a PING frame after
-     * {@value com.turo.pushy.apns.ApnsClient#DEFAULT_PING_IDLE_TIME_MILLIS} milliseconds of inactivity.
+     * {@value com.turo.pushy.apns.ApnsClientBuilder#DEFAULT_PING_IDLE_TIME_MILLIS} milliseconds of inactivity.
      *
      * @param pingInterval the amount of idle time after which the client will send a PING frame
-     * @param timeoutUnit the time unit for the given idle time
+     * @param pingIntervalUnit the time unit for the given idle time
      *
      * @return a reference to this builder
      *
      * @since 0.10
      */
-    public ApnsClientBuilder setIdlePingInterval(final long pingInterval, final TimeUnit timeoutUnit) {
-        this.idlePingInterval = pingInterval;
-        this.idlePingIntervalUnit = timeoutUnit;
-
+    public ApnsClientBuilder setIdlePingInterval(final long pingInterval, final TimeUnit pingIntervalUnit) {
+        this.idlePingIntervalMillis = pingIntervalUnit.toMillis(pingInterval);
         return this;
     }
 
@@ -465,9 +459,7 @@ public class ApnsClientBuilder {
      * @since 0.8
      */
     public ApnsClientBuilder setGracefulShutdownTimeout(final long gracefulShutdownTimeout, final TimeUnit timeoutUnit) {
-        this.gracefulShutdownTimeout = gracefulShutdownTimeout;
-        this.gracefulShutdownTimeoutUnit = timeoutUnit;
-
+        this.gracefulShutdownTimeoutMillis = timeoutUnit.toMillis(gracefulShutdownTimeout);
         return this;
     }
 
@@ -520,10 +512,8 @@ public class ApnsClientBuilder {
             sslContext = sslContextBuilder.build();
         }
 
-        final int connectTimeoutMillis = this.connectionTimeout != null ? (int) this.connectionTimeoutUnit.toMillis(this.connectionTimeout) : 0;
-        final long idlePingIntervalMillis = this.idlePingInterval != null ? this.idlePingIntervalUnit.toMillis(this.idlePingInterval) : 0;
-        final long gracefulShutdownTimeoutMillis = this.gracefulShutdownTimeout != null ? this.gracefulShutdownTimeoutUnit.toMillis(this.gracefulShutdownTimeout) : 0;
-
-        return new ApnsClient(this.apnsServerAddress, sslContext, signingKey, proxyHandlerFactory, connectTimeoutMillis, idlePingIntervalMillis, gracefulShutdownTimeoutMillis, this.concurrentConnections, this.metricsListener, this.eventLoopGroup);
+        return new ApnsClient(this.apnsServerAddress, sslContext, this.signingKey, this.proxyHandlerFactory,
+                this.connectionTimeoutMillis, this.idlePingIntervalMillis, this.gracefulShutdownTimeoutMillis,
+                this.concurrentConnections, this.metricsListener, this.eventLoopGroup);
     }
 }

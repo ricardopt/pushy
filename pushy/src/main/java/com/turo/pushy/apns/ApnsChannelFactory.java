@@ -46,7 +46,7 @@ class ApnsChannelFactory implements PooledObjectFactory<Channel> {
 
     private final Bootstrap bootstrapTemplate;
 
-    private AtomicLong currentDelaySeconds = new AtomicLong(0);
+    private final AtomicLong currentDelaySeconds = new AtomicLong(0);
 
     private static final long MIN_CONNECT_DELAY_MILLIS = 1; // second
     private static final long MAX_CONNECT_DELAY_MILLIS = 60; // seconds
@@ -54,10 +54,10 @@ class ApnsChannelFactory implements PooledObjectFactory<Channel> {
     private static final AttributeKey<Promise<Channel>> CHANNEL_READY_PROMISE_ATTRIBUTE_KEY =
             AttributeKey.valueOf(ApnsChannelFactory.class, "channelReadyPromise");
 
-    public ApnsChannelFactory(final SslContext sslContext, final ApnsSigningKey signingKey,
-                              final ProxyHandlerFactory proxyHandlerFactory, final int connectTimeoutMillis,
-                              final long idlePingIntervalMillis, final long gracefulShutdownTimeoutMillis,
-                              final InetSocketAddress apnsServerAddress, final EventLoopGroup eventLoopGroup) {
+    ApnsChannelFactory(final SslContext sslContext, final ApnsSigningKey signingKey,
+                       final ProxyHandlerFactory proxyHandlerFactory, final int connectTimeoutMillis,
+                       final long idlePingIntervalMillis, final long gracefulShutdownTimeoutMillis,
+                       final InetSocketAddress apnsServerAddress, final EventLoopGroup eventLoopGroup) {
 
         this.bootstrapTemplate = new Bootstrap();
         this.bootstrapTemplate.group(eventLoopGroup);

@@ -91,13 +91,6 @@ public class ApnsClient {
     private static final IllegalStateException CLIENT_CLOSED_EXCEPTION =
             new IllegalStateException("Client has been closed and can no longer send push notifications.");
 
-    /**
-     * The default idle time in milliseconds after which the client will send a PING frame to the APNs server.
-     *
-     * @since 0.10
-     */
-    public static final int DEFAULT_PING_IDLE_TIME_MILLIS = 60_000;
-
     private static final Logger log = LoggerFactory.getLogger(ApnsClient.class);
 
     private static class NoopApnsClientMetricsListener implements ApnsClientMetricsListener {

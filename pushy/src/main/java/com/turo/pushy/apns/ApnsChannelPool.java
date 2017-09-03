@@ -174,7 +174,14 @@ class ApnsChannelPool {
 
         this.metricsListener.handleConnectionRemoved();
 
-        this.channelFactory.destroy(channel, this.executor.<Void>newPromise());
+        this.channelFactory.destroy(channel, this.executor.<Void>newPromise()).addListener(new GenericFutureListener<Future<Void>>() {
+            @Override
+            public void operationComplete(final Future<Void> destroyFuture) throws Exception {
+                if (!destroyFuture.isSuccess()) {
+                    log.warn("Failed to destroy channel.", destroyFuture.cause());
+                }
+            }
+        });
     }
 
     public Future<Void> close() {
