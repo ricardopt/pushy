@@ -42,6 +42,10 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * An APNs channel factory creates new channels connected to an APNs server. Channels constructed by this factory are
+ * intended for use in an {@link ApnsChannelPool}.
+ */
 class ApnsChannelFactory implements PooledObjectFactory<Channel> {
 
     private final Bootstrap bootstrapTemplate;
@@ -129,6 +133,15 @@ class ApnsChannelFactory implements PooledObjectFactory<Channel> {
         });
     }
 
+    /**
+     * Creates and connects a new channel. The initial connection attempt may be delayed to accommodate exponential
+     * back-off requirements.
+     *
+     * @param channelReadyPromise the promise to be notified when a channel has been created and connected to the APNs
+     * server
+     *
+     * @return a future that will be notified once a channel has been created and connected to the APNs server
+     */
     @Override
     public Future<Channel> create(final Promise<Channel> channelReadyPromise) {
         final long delay = this.currentDelaySeconds.get();
@@ -168,8 +181,8 @@ class ApnsChannelFactory implements PooledObjectFactory<Channel> {
 
                     @Override
                     public void operationComplete(final ChannelFuture future) throws Exception {
-                        // We always want to try to fail the "channel ready" promise if the connection closes; if it has already
-                        // succeeded, this will have no effect.
+                        // We always want to try to fail the "channel ready" promise if the connection closes; if it has
+                        // already succeeded, this will have no effect.
                         channelReadyPromise.tryFailure(
                                 new IllegalStateException("Channel closed before HTTP/2 preface completed."));
                     }
@@ -181,6 +194,14 @@ class ApnsChannelFactory implements PooledObjectFactory<Channel> {
         return channelReadyPromise;
     }
 
+    /**
+     * Destroys a channel by closing it.
+     *
+     * @param channel the channel to destroy
+     * @param promise the promise to notify when the channel has been destroyed
+     *
+     * @return a future that will be notified when the channel has been destroyed
+     */
     @Override
     public Future<Void> destroy(final Channel channel, final Promise<Void> promise) {
         channel.close().addListener(new PromiseNotifier<>(promise));

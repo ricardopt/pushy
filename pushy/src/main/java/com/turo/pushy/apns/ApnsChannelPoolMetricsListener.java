@@ -22,9 +22,24 @@
 
 package com.turo.pushy.apns;
 
-public interface ApnsChannelPoolMetricsListener {
+/**
+ * A channel pool metrics listener receives events from an {@link ApnsChannelPool} that can be used to measure the
+ * performance and behavior of the pool.
+ */
+interface ApnsChannelPoolMetricsListener {
 
+    /**
+     * Indicates that a new connection was added to the channel pool.
+     */
     void handleConnectionAdded();
+
+    /**
+     * Indicates that a connection was permanently removed from the channel pool.
+     */
     void handleConnectionRemoved();
+
+    /**
+     * Indicates that an attempt to add a new channel to the channel pool failed.
+     */
     void handleConnectionCreationFailed();
 }
