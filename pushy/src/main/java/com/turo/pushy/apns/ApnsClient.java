@@ -57,16 +57,9 @@ import java.util.concurrent.atomic.AtomicLong;
  * time. If a signing key is provided, the client will use token authentication when sending notifications; otherwise,
  * it will use TLS-based authentication. It is an error to provide both a client certificate and a signing key.</p>
  *
- * <p>Once a client has been constructed, it must connect to an APNs server before it can begin sending push
- * notifications. Apple provides a production and development gateway; see
- * {@link ApnsClientBuilder#PRODUCTION_APNS_HOST} and {@link ApnsClientBuilder#DEVELOPMENT_APNS_HOST}. See the
- * <a href="https://developer.apple.com/library/content/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/CommunicatingwithAPNs.html#//apple_ref/doc/uid/TP40008194-CH11-SW1">Communicating
- * with APNs</a> documentation for additional details.</p>
- *
- * <p>Once a connection has been established, an APNs client will attempt to restore that connection automatically if
- * the connection closes unexpectedly. APNs clients employ an exponential back-off strategy to manage the rate of
- * reconnection attempts. Clients will stop trying to reconnect automatically if disconnected via the
- * {@link ApnsClient#close()} method.</p>
+ * <p>Clients maintain their own internal connection pools and open connections to the APNs server on demand. As a
+ * result, clients do <em>not</em> need to be "started" explicitly, and are ready to begin sending notifications as soon
+ * as they're constructed.</p>
  *
  * <p>Notifications sent by a client to an APNs server are sent asynchronously. A
  * {@link io.netty.util.concurrent.Future io.netty.util.concurrent.Future} is returned immediately when a notification
@@ -76,7 +69,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * {@link java.util.concurrent.Future java.util.concurrent.Future} interface that allows callers to attach listeners
  * that will be notified when the {@code Future} completes.</p>
  *
- * <p>APNs clients are intended to be long-lived, persistent resources. Callers should shut them down when they are no
+ * <p>APNs clients are intended to be long-lived, persistent resources. Callers must shut them down when they are no
  * longer needed (i.e. when shutting down the entire application). If an event loop group was specified at construction
  * time, callers should shut down that event loop group when all clients using that group have been disconnected.</p>
  *

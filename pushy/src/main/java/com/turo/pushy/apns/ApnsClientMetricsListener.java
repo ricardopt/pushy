@@ -30,7 +30,7 @@ package com.turo.pushy.apns;
  * <p>The information provided to metrics listeners is intended only to measure the performance and behavior of an
  * {@code ApnsClient}; metrics listeners should never be used to drive business logic.</p>
  *
- * @see ApnsClient#setMetricsListener(ApnsClientMetricsListener)
+ * @see ApnsClientBuilder#setMetricsListener(ApnsClientMetricsListener)
  *
  * @author <a href="https://github.com/jchambers">Jon Chambers</a>
  *

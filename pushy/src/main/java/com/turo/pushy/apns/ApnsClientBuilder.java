@@ -118,10 +118,45 @@ public class ApnsClientBuilder {
 
     private static final Logger log = LoggerFactory.getLogger(ApnsClientBuilder.class);
 
+    /**
+     * Sets the hostname of the server to which the client under construction will connect. Apple provides a production
+     * and development environment.
+     *
+     * @param hostname the hostname of the server to which the client under construction should connect
+     *
+     * @return a reference to this builder
+     *
+     * @see ApnsClientBuilder#DEVELOPMENT_APNS_HOST
+     * @see ApnsClientBuilder#PRODUCTION_APNS_HOST
+     *
+     * @see <a href="https://developer.apple.com/library/content/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/CommunicatingwithAPNs.html#//apple_ref/doc/uid/TP40008194-CH11-SW1">Communicating with APNs</a>
+     *
+     * @since 0.11
+     */
     public ApnsClientBuilder setApnsServer(final String hostname) {
         return this.setApnsServer(hostname, DEFAULT_APNS_PORT);
     }
 
+    /**
+     * Sets the hostname and port of the server to which the client under construction will connect. Apple provides a
+     * production and development environment, both of which listen for traffic on the default HTTPS port
+     * ({@value DEFAULT_APNS_PORT}) and an alternate port ({@value ALTERNATE_APNS_PORT}), which callers may use to work
+     * around firewall or proxy restrictions.
+     *
+     * @param hostname the hostname of the server to which the client under construction should connect
+     * @param port the port to which the client under contruction should connect
+     *
+     * @return a reference to this builder
+     *
+     * @see ApnsClientBuilder#DEVELOPMENT_APNS_HOST
+     * @see ApnsClientBuilder#PRODUCTION_APNS_HOST
+     * @see ApnsClientBuilder#DEFAULT_APNS_PORT
+     * @see ApnsClientBuilder#ALTERNATE_APNS_PORT
+     *
+     * @see <a href="https://developer.apple.com/library/content/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/CommunicatingwithAPNs.html#//apple_ref/doc/uid/TP40008194-CH11-SW1">Communicating with APNs</a>
+     *
+     * @since 0.11
+     */
     public ApnsClientBuilder setApnsServer(final String hostname, final int port) {
         this.apnsServerAddress = new InetSocketAddress(hostname, port);
         return this;
@@ -328,6 +363,17 @@ public class ApnsClientBuilder {
         return this;
     }
 
+    /**
+     * Sets the maximum number of concurrent connections the client under construction may attempt to maintain to the
+     * APNs server. By default, clients will attempt to maintain a single connection to the APNs server.
+     *
+     * @param concurrentConnections the maximum number of concurrent connections the client under construction may
+     * attempt to maintain
+     *
+     * @return a reference to this builder
+     *
+     * @since 0.11
+     */
     public ApnsClientBuilder setConcurrentConnections(final int concurrentConnections) {
         this.concurrentConnections = concurrentConnections;
         return this;
